@@ -51,8 +51,6 @@ client.on('message', function (message, remote) {
 
 client.bind(PORT, HOST);
 
-require('dotenv').config();
-
 const app = express();
 const port = process.env.PORT || 5000;
 
