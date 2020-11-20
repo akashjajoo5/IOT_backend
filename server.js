@@ -8,10 +8,10 @@ var HOST = '0.0.0.0'; //this is your own IP
 var dgram = require('dgram');
 var client = dgram.createSocket('udp4');
 
-let mySet = new Set();
-let services = [];
-let thingss = [];
-let entities = [];
+let services = new Map();
+let thingss = new Map();
+let entities = new Map();
+let relationships = new Map();
 
 client.on('listening', function () {
 	var address = client.address();
@@ -25,27 +25,47 @@ client.on('listening', function () {
 
 client.on('message', function (message, remote) {
 	var obj = JSON.stringify(message.toString());
-	if (!mySet.has(obj)) {
-		mySet.add(obj);
-		obj = obj.replace(/\\/g, '');
-		var type = getTweetParameter('Tweet Type', obj);
-		console.log('\n' + type);
-		switch (type) {
-			case 'Identity_Thing':
+	obj = obj.replace(/\\/g, '');
+	var type = getTweetParameter('Tweet Type', obj);
+	console.log('\n' + type);
+	switch (type) {
+		case 'Identity_Thing':
+			if (thingss.has(obj)) {
+				let temp = thingss.get(obj);
+				temp.lastSeen = Date.now();
+			} else {
 				parseThing(obj);
-				break;
-			case 'Service':
+			}
+			break;
+		case 'Service':
+			if (services.has(obj)) {
+				let temp = services.get(obj);
+				temp.lastSeen = Date.now();
+			} else {
 				parseService(obj);
-				break;
-			case 'Identity_Language':
-				parseThingNetworkInfo(obj);
-				break;
-			case 'Identity_Entity':
+			}
+			break;
+		case 'Relationship':
+			if (relationships.has(obj)) {
+				let temp = relationships.get(obj);
+				temp.lastSeen = Date.now();
+			} else {
+				parseRelationship(obj);
+			}
+			break;
+		case 'Identity_Language':
+			parseThingNetworkInfo(obj);
+			break;
+		case 'Identity_Entity':
+			if (entities.has(obj)) {
+				let temp = entities.get(obj);
+				temp.lastSeen = Date.now();
+			} else {
 				parseEntity(obj);
-				break;
-			default:
-				break;
-		}
+			}
+			break;
+		default:
+			break;
 	}
 });
 
@@ -63,11 +83,27 @@ app.listen(port, () => {
 
 //<------------------ APIs --------------------------->
 app.get('/getservices', (req, res) => {
-	res.json(services);
+	let ans = [];
+	for (let value of services.values()) {
+		if (value.lastSeen > Date.now() - 90000) ans.push(value);
+	}
+	res.json(ans);
 });
 
 app.get('/getthings', (req, res) => {
-	res.json(thingss);
+	let ans = [];
+	for (let value of thingss.values()) {
+		if (value.lastSeen > Date.now() - 90000) ans.push(value);
+	}
+	res.json(ans);
+});
+
+app.get('/getrelationships', (req, res) => {
+	let ans = [];
+	for (let value of relationships.values()) {
+		if (value.lastSeen > Date.now() - 90000) ans.push(value);
+	}
+	res.json(ans);
 });
 
 //<------------------ Parsing Tweets ----------------->
@@ -87,9 +123,26 @@ function parseThing(tweet) {
 		model: getTweetParameter('Model', tweet),
 		OS: getTweetParameter('OS', tweet),
 		vendor: getTweetParameter('Vendor', tweet),
+		lastSeen: Date.now(),
 	};
-	thingss.push(ans);
+	thingss.set(tweet, ans);
 	//console.log(thingss);
+}
+
+function parseRelationship(tweet) {
+	var ans = {
+		thingID: getTweetParameter('Thing ID', tweet),
+		spaceID: getTweetParameter('Space ID', tweet),
+		name: getTweetParameter('Name', tweet),
+		owner: getTweetParameter('Owner', tweet),
+		category: getTweetParameter('Category', tweet),
+		type: getTweetParameter('Type', tweet),
+		description: getTweetParameter('Description', tweet),
+		firstService: getTweetParameter('FS name', tweet),
+		secondService: getTweetParameter('SS name', tweet),
+		lastSeen: Date.now(),
+	};
+	relationships.set(tweet, ans);
 }
 
 function parseEntity(tweet) {
@@ -102,8 +155,9 @@ function parseEntity(tweet) {
 		name: getTweetParameter('Name', tweet),
 		entityType: getTweetParameter('Type', tweet),
 		vendor: getTweetParameter('Vendor', tweet),
+		lastSeen: Date.now(),
 	};
-	entities.push(ans);
+	entities.set(tweet, ans);
 	//console.log(entities);
 }
 
@@ -119,8 +173,9 @@ function parseService(tweet) {
 		vendor: getTweetParameter('Vendor', tweet),
 		APIstring: getAPIString(tweet),
 		keywords: getKeywords(tweet),
+		lastSeen: Date.now(),
 	};
-	services.push(ans);
+	services.set(tweet, ans);
 	//console.log(services);
 }
 
@@ -132,6 +187,7 @@ function parseThingNetworkInfo(tweet) {
 		commLanguage: getTweetParameter('Communication Language', tweet),
 		IP: getTweetParameter('IP', tweet),
 		port: getTweetParameter('Port', tweet),
+		lastSeen: Date.now(),
 	};
 	//console.log(ans);
 }
