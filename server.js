@@ -106,6 +106,63 @@ app.get('/getrelationships', (req, res) => {
 	res.json(ans);
 });
 
+app.post('/runservice', (req, res) => {
+	//console.log(req.body.tweet.inputs);
+	try {
+		const Net = require('net');
+		// The port number and hostname of the server.
+		const port = 6668;
+		const host = '10.254.0.3';
+
+		// Create a new TCP client.
+		const client = new Net.Socket();
+		// Send a connection request to the server.
+		client.connect({ port: port, host: host }, function () {
+			// If there is no error, the server has accepted the request and created a new
+			// socket dedicated to us.
+			console.log('TCP connection established with the server.');
+
+			// The client can now send data to the server by writing to its socket.
+			let numInputs = req.body.tweet.inputCount;
+			let nums = req.body.tweet.inputs;
+			let str = '';
+			for (let i = 0; i < numInputs; i++) {
+				str += nums[i].toString() + ',';
+			}
+			str = str.substring(0, str.length - 1);
+			console.log(str);
+			data = JSON.stringify({
+				'Tweet Type': req.body.tweet.serviceType,
+				'Thing ID': req.body.tweet.thingID,
+				'Space ID': req.body.tweet.spaceID,
+				'Service Name': req.body.tweet.name,
+				'Service Inputs': '(' + str + ')',
+			});
+			client.write(data.toString());
+		});
+
+		// The client can also receive data from the server by reading from its socket.
+		client.on('data', function (chunk) {
+			console.log(chunk.toString());
+
+			// // Request an end to the connection after the data has been received.
+			res.json(chunk.toString());
+			client.end();
+		});
+
+		client.on('end', function () {
+			console.log('Requested an end to the TCP connection');
+		});
+
+		client.on('error', function (ex) {
+			console.log(ex);
+			res.status(400).send({ error: ex });
+		});
+	} catch (err) {
+		console.log(err);
+	}
+});
+
 //<------------------ Parsing Tweets ----------------->
 function getTweetParameter(parameterName, tweet) {
 	let i = tweet.indexOf(parameterName) + parameterName.length + 5;
