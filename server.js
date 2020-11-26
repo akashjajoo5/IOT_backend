@@ -12,6 +12,7 @@ let services = new Map();
 let thingss = new Map();
 let entities = new Map();
 let relationships = new Map();
+let ipMapping = new Map();
 
 client.on('listening', function () {
 	var address = client.address();
@@ -107,12 +108,19 @@ app.get('/getrelationships', (req, res) => {
 });
 
 app.post('/runservice', (req, res) => {
-	//console.log(req.body.tweet.inputs);
+	//console.log(req.body.tweet.thingID);
 	try {
 		const Net = require('net');
 		// The port number and hostname of the server.
 		const port = 6668;
-		const host = '10.254.0.3';
+		let host = '0.0.0.0';
+		if (ipMapping.has(req.body.tweet.thingID)) {
+			host = ipMapping.get(req.body.tweet.thingID);
+		} else {
+			res
+				.status(400)
+				.send({ errorMessage: 'Could not find IP, try again after sometime' });
+		}
 
 		// Create a new TCP client.
 		const client = new Net.Socket();
@@ -246,7 +254,13 @@ function parseThingNetworkInfo(tweet) {
 		port: getTweetParameter('Port', tweet),
 		lastSeen: Date.now(),
 	};
-	//console.log(ans);
+	if (ipMapping.has(ans.thingID)) {
+		let temp = ipMapping.get(ans.thingID);
+		temp.IP = ans.IP;
+	} else {
+		ipMapping.set(ans.thingID, ans.IP);
+	}
+	console.log(ans);
 }
 
 function getAPIString(tweet) {
