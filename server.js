@@ -146,6 +146,7 @@ app.post('/runservice', (req, res) => {
 				'Service Name': req.body.tweet.name,
 				'Service Inputs': '(' + str + ')',
 			});
+			console.log(data);
 			client.write(data.toString());
 		});
 
@@ -201,12 +202,13 @@ function parseRelationship(tweet) {
 		name: getTweetParameter('Name', tweet),
 		owner: getTweetParameter('Owner', tweet),
 		category: getTweetParameter('Category', tweet),
-		type: getTweetParameter('Type', tweet),
+		type: getTweetParameter('Type', tweet.substring(tweet.indexOf('Thing ID'))),
 		description: getTweetParameter('Description', tweet),
 		firstService: getTweetParameter('FS name', tweet),
 		secondService: getTweetParameter('SS name', tweet),
 		lastSeen: Date.now(),
 	};
+	//console.log(ans);
 	relationships.set(tweet, ans);
 }
 
