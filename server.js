@@ -110,6 +110,33 @@ app.get('/getrelationships', (req, res) => {
 	res.json(ans);
 });
 
+app.post('/setimageurl', (req, res) => {
+	let imageUrl = req.body.imageUrl;
+	let type = req.body.type;
+	let name = req.body.name;
+	console.log(imageUrl);
+	if (type === 'Services') {
+		for (let value of services.values()) {
+			if (value.name === name) {
+				value.imageUrl = imageUrl;
+				//console.log(value);
+				res.json({ message: 'Url updated successfully' });
+				return;
+			}
+		}
+	} else if (type === 'Things') {
+		for (let value of thingss.values()) {
+			if (value.name === name) {
+				value.imageUrl = imageUrl;
+				//console.log(value);
+				res.json({ message: 'Url updated successfully' });
+				return;
+			}
+		}
+	}
+	res.status(400).send({ error: 'Name not found' });
+});
+
 app.post('/runservice', (req, res) => {
 	//console.log(req.body.tweet.thingID);
 	try {
