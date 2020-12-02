@@ -86,7 +86,8 @@ app.listen(port, () => {
 app.get('/getservices', (req, res) => {
 	let ans = [];
 	for (let value of services.values()) {
-		if (value.lastSeen > Date.now() - 90000) ans.push(value);
+		if (value.lastSeen > Date.now() - 90000 && value.spaceID === 'Group_1')
+			ans.push(value);
 	}
 	res.json(ans);
 });
@@ -94,7 +95,8 @@ app.get('/getservices', (req, res) => {
 app.get('/getthings', (req, res) => {
 	let ans = [];
 	for (let value of thingss.values()) {
-		if (value.lastSeen > Date.now() - 90000) ans.push(value);
+		if (value.lastSeen > Date.now() - 90000 && value.spaceID === 'Group_1')
+			ans.push(value);
 	}
 	res.json(ans);
 });
@@ -102,7 +104,8 @@ app.get('/getthings', (req, res) => {
 app.get('/getrelationships', (req, res) => {
 	let ans = [];
 	for (let value of relationships.values()) {
-		if (value.lastSeen > Date.now() - 90000) ans.push(value);
+		if (value.lastSeen > Date.now() - 90000 && value.spaceID === 'Group_1')
+			ans.push(value);
 	}
 	res.json(ans);
 });
