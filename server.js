@@ -193,6 +193,7 @@ function parseThing(tweet) {
 		OS: getTweetParameter('OS', tweet),
 		vendor: getTweetParameter('Vendor', tweet),
 		lastSeen: Date.now(),
+		imageUrl: '',
 	};
 	thingss.set(tweet, ans);
 	//console.log(thingss);
@@ -210,6 +211,7 @@ function parseRelationship(tweet) {
 		firstService: getTweetParameter('FS name', tweet),
 		secondService: getTweetParameter('SS name', tweet),
 		lastSeen: Date.now(),
+		imageUrl: '',
 	};
 	//console.log(ans);
 	relationships.set(tweet, ans);
@@ -226,6 +228,7 @@ function parseEntity(tweet) {
 		entityType: getTweetParameter('Type', tweet),
 		vendor: getTweetParameter('Vendor', tweet),
 		lastSeen: Date.now(),
+		imageUrl: '',
 	};
 	entities.set(tweet, ans);
 	//console.log(entities);
@@ -244,6 +247,7 @@ function parseService(tweet) {
 		APIstring: getAPIString(tweet),
 		keywords: getKeywords(tweet),
 		lastSeen: Date.now(),
+		imageUrl: '',
 	};
 	services.set(tweet, ans);
 	//console.log(services);
