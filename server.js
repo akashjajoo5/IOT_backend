@@ -114,10 +114,11 @@ app.post('/setimageurl', (req, res) => {
 	let imageUrl = req.body.imageUrl;
 	let type = req.body.type;
 	let name = req.body.name;
+	let thingID = req.body.thingID;
 	console.log(imageUrl);
 	if (type === 'Services') {
 		for (let value of services.values()) {
-			if (value.name === name) {
+			if (value.name === name && value.thingID === thingID) {
 				value.imageUrl = imageUrl;
 				//console.log(value);
 				res.json({ message: 'Url updated successfully' });
@@ -126,7 +127,7 @@ app.post('/setimageurl', (req, res) => {
 		}
 	} else if (type === 'Things') {
 		for (let value of thingss.values()) {
-			if (value.name === name) {
+			if (value.name === name && value.thingID === thingID) {
 				value.imageUrl = imageUrl;
 				//console.log(value);
 				res.json({ message: 'Url updated successfully' });
